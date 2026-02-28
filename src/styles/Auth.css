@@ -65,3 +65,29 @@
   cursor: pointer;
   font-weight: 600;
 }
+
+.captcha-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.captcha-canvas {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f9f9f9;
+}
+
+.refresh-btn {
+  padding: 6px 10px;
+  cursor: pointer;
+  border: none;
+  background: #eee;
+  font-size: 16px;
+  border-radius: 4px;
+}
+
+.refresh-btn:hover {
+  background: #ddd;
+}

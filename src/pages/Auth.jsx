@@ -1,26 +1,85 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
 
 export default function Auth() {
   const navigate = useNavigate();
+  const canvasRef = useRef(null);
 
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [captchaAnswer, setCaptchaAnswer] = useState("");
-  const [generatedCaptcha, setGeneratedCaptcha] = useState({ a: 0, b: 0 });
+  const [generatedCaptcha, setGeneratedCaptcha] = useState("");
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     generateCaptcha();
   }, []);
 
+  useEffect(() => {
+    if (generatedCaptcha) drawCaptcha();
+  }, [generatedCaptcha]);
+
   const generateCaptcha = () => {
-    const a = Math.floor(Math.random() * 10);
-    const b = Math.floor(Math.random() * 10);
-    setGeneratedCaptcha({ a, b });
+    const chars = "0123456789";
+    let captcha = "";
+    for (let i = 0; i < 5; i++) {
+      captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setGeneratedCaptcha(captcha);
+  };
+
+  const drawCaptcha = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background
+    ctx.fillStyle = "#f2f2f2";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw random lines (distortion)
+    for (let i = 0; i < 5; i++) {
+      ctx.strokeStyle = randomColor();
+      ctx.beginPath();
+      ctx.moveTo(
+        Math.random() * canvas.width,
+        Math.random() * canvas.height
+      );
+      ctx.lineTo(
+        Math.random() * canvas.width,
+        Math.random() * canvas.height
+      );
+      ctx.stroke();
+    }
+
+    // Draw digits
+    for (let i = 0; i < generatedCaptcha.length; i++) {
+      ctx.save();
+
+      ctx.font = "24px Arial";
+      ctx.fillStyle = randomColor();
+
+      const x = 20 + i * 30;
+      const y = 35;
+
+      const angle = (Math.random() - 0.5) * 0.5;
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      ctx.fillText(generatedCaptcha[i], 0, 0);
+
+      ctx.restore();
+    }
+  };
+
+  const randomColor = () => {
+    return `rgb(${Math.floor(Math.random() * 150)},
+                ${Math.floor(Math.random() * 150)},
+                ${Math.floor(Math.random() * 150)})`;
   };
 
   const validateEmail = (email) =>
@@ -43,10 +102,7 @@ export default function Auth() {
     if (!isLogin && password !== confirmPassword)
       newErrors.confirm = "Passwords do not match.";
 
-    if (
-      parseInt(captchaAnswer) !==
-      generatedCaptcha.a + generatedCaptcha.b
-    )
+    if (captchaAnswer !== generatedCaptcha)
       newErrors.captcha = "Captcha incorrect.";
 
     setErrors(newErrors);
@@ -57,7 +113,10 @@ export default function Auth() {
         JSON.stringify({ email })
       );
 
-      navigate("/dashboard", { replace: true });
+      navigate("/home", { replace: true });
+    } else {
+      generateCaptcha(); // regenerate if wrong
+      setCaptchaAnswer("");
     }
   };
 
@@ -100,9 +159,24 @@ export default function Auth() {
             </>
           )}
 
-          <label>
-            What is {generatedCaptcha.a} + {generatedCaptcha.b} ?
-          </label>
+          <label>Enter Captcha</label>
+
+          <div className="captcha-container">
+            <canvas
+              ref={canvasRef}
+              width="180"
+              height="50"
+              className="captcha-canvas"
+            />
+            <button
+              type="button"
+              onClick={generateCaptcha}
+              className="refresh-btn"
+            >
+              ↻
+            </button>
+          </div>
+
           <input
             type="text"
             value={captchaAnswer}

@@ -49,7 +49,7 @@ export default function Dashboard() {
     <div className="dashboard-container">
 
       {/* Welcome */}
-      <h1 className="welcome">Welcome back, Alex 👋</h1>
+      <h1 className="welcome">Welcome back, User 👋</h1>
       <p className="subtitle">
         Here's your mental wellness overview for today
       </p>
