@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
 
+
 export default function Auth() {
   const navigate = useNavigate();
   const canvasRef = useRef(null);

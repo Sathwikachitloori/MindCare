@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "../styles/Journal.css";
 
+
 export default function Journal() {
   const today = new Date().toISOString().split("T")[0];
 
