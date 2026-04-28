@@ -1,6 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL
+});
+
 
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";  
