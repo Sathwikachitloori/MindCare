@@ -1,10 +1,9 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://mindcare-backend-production-87f0.up.railway.app/api",
+  baseURL: "http://localhost:5000/api", // ✅ CHANGE HERE
 });
 
-// Attach token automatically
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
 

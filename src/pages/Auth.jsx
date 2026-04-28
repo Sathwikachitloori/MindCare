@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../api"; // ✅ ADDED BACK
 import "../styles/Auth.css";
-
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -38,26 +38,17 @@ export default function Auth() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Background
     ctx.fillStyle = "#f2f2f2";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw random lines (distortion)
     for (let i = 0; i < 5; i++) {
       ctx.strokeStyle = randomColor();
       ctx.beginPath();
-      ctx.moveTo(
-        Math.random() * canvas.width,
-        Math.random() * canvas.height
-      );
-      ctx.lineTo(
-        Math.random() * canvas.width,
-        Math.random() * canvas.height
-      );
+      ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+      ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
       ctx.stroke();
     }
 
-    // Draw digits
     for (let i = 0; i < generatedCaptcha.length; i++) {
       ctx.save();
 
@@ -89,7 +80,8 @@ export default function Auth() {
   const validatePassword = (password) =>
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(password);
 
-  const handleSubmit = (e) => {
+  // ✅ FIXED HANDLE SUBMIT
+  const handleSubmit = async (e) => { // 🔥 async added
     e.preventDefault();
     let newErrors = {};
 
@@ -109,14 +101,37 @@ export default function Auth() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      localStorage.setItem(
-        "demoUser",
-        JSON.stringify({ email })
-      );
+      try {
+        let res;
 
-      navigate("/home", { replace: true });
+        if (isLogin) {
+          // ✅ LOGIN API
+          res = await API.post("/auth/login", { email, password });
+        } else {
+          // ✅ REGISTER API
+          res = await API.post("/auth/register", {
+            name: "User",
+            email,
+            password,
+          });
+        }
+
+        console.log("Response:", res.data);
+
+        // ✅ STORE TOKEN + NAVIGATE ONLY ON SUCCESS
+        if (res.data && res.data.token) {
+          localStorage.setItem("token", res.data.token);
+          navigate("/home", { replace: true });
+        } else {
+          alert("Login/Register failed");
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.message || err.message);
+      }
     } else {
-      generateCaptcha(); // regenerate if wrong
+      generateCaptcha();
       setCaptchaAnswer("");
     }
   };
@@ -189,7 +204,8 @@ export default function Auth() {
             <p className="error">{errors.captcha}</p>
           )}
 
-          <button className="primary-btn full-width">
+          {/* ✅ IMPORTANT FIX */}
+          <button type="submit" className="primary-btn full-width">
             {isLogin ? "Login" : "Sign Up"}
           </button>
         </form>

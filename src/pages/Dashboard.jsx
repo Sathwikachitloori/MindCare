@@ -44,6 +44,7 @@ export default function Dashboard() {
 
     setSelectedMood(null);
   };
+  
 
   return (
     <div className="dashboard-container">
